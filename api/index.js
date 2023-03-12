@@ -17,7 +17,6 @@ const connect = async () => {
     throw error;
   }
 };
-connect();
 
 mongoose.connection.on("disconnect", () => {
   console.log("mongoose disconnected");
@@ -28,6 +27,7 @@ mongoose.connection.on("connected", () => {
 });
 
 //Middlewares
+
 app.use(express.json());
 
 app.use("/api/auth", authRoute);
@@ -35,7 +35,19 @@ app.use("/api/users", usersRoute);
 app.use("/api/hotels", hotelsRoute);
 app.use("/api/rooms", roomsRoute);
 
+app.use((err, req, res, next) => {
+  const erroeStatus = err.status || 500;
+  const errorMessage = err.message || "Something went wrong";
+  return res.status(erroeStatus).json({
+    success: false,
+    status: erroeStatus,
+    message: errorMessage,
+    stack: err.stack,
+  });
+});
+
 app.listen(8800, () => {
+  connect();
   console.log("Connected to backend!");
 });
 
